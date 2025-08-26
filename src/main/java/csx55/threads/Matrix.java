@@ -3,47 +3,67 @@ package csx55.threads;
 import java.util.Random;
 
 public class Matrix {
+    
+    private String name;
+    private int[][] data;
+    private long sum;
+    private double timeToCompute;
+    
+    public Matrix() {} // End default Matrix constructor
 
-    private char name;
-    public int[][] data;
-    private double timeToComputeSum;
-
-    public Matrix() {} // End default constructor
-
-    public Matrix(char name, int dimensions) {
+    public Matrix(String name, int n) {
         this.name = name;
-        this.data = new int[dimensions][dimensions];
-    } // End Matrix() constructor
+        this.data = new int[n][n];
+        this.sum = 0;
+    } // End Matrix constructor
 
-    public Matrix(char name, int dimensions, Random gen) {
-        this(name, dimensions);
+    public Matrix(String name, int n, Random rng) {
+        this(name, n);
 
-        for (int column = 0; column < data.length; ++column) {
-            for (int row = 0; row < data.length; ++row) {
-                // int randomValue = gen.nextInt(10) + 1;
-                int randomValue = 1000 - gen.nextInt(2000);
-                data[column][row] = randomValue;
-            } // End nested for loop
-        } // End for loop
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                this.data[i][j] = 1000 - rng.nextInt(2000);
+            }
+        }
 
-        System.out.println("Sum of the elements in input matrix " + getName() + " = " + sumOfMatrixElements(data, dimensions));
-    } // End Matrix() constructor
+        System.out.printf("Sum of the elements in input matrix %s = %d\n", getName(), sum());
+    } // End Matrix constructor
 
-    public char getName() {
+    public void multiplyMatrices(Matrix one, Matrix two, ThreadPool pool) {
+        int n = one.data.length;
+        two.transpose();
+
+        int[][] matrixOne = one.data;
+        int[][] matrixTwo = two.data;
+        
+        Job newJob;
+        long startTime = System.nanoTime();
+        for (int row = 0; row < n; ++row) {
+            for (int col = 0; col < n; ++col) {
+                newJob = new Job(matrixOne, matrixTwo, row, col, this.data);
+                pool.addJob(newJob);
+            }
+        }
+
+        while (pool.isJobQueueEmpty() != true) {
+            Thread.onSpinWait();
+        }
+
+        Long endTime = System.nanoTime();
+
+        this.timeToCompute = (endTime - startTime) / 1e9;
+
+        System.out.printf("Calcuation of matrix %s (product of %s and %s) complete - sum of elements in %s is: %d\n", getName(), one.getName(), two.getName(), getName(), sum());
+        System.out.printf("Time to compute matrix %s: %.3f seconds.\n", getName(), getTimeToCompute());
+    } // End multiplyMatrices method
+
+    public String getName() {
         return this.name;
     } // End getName() method
 
-    public int[][] getData() {
-        return this.data;
-    } // End getData() method
-
-    public void setData(int[][] d) {
-        this.data = d;
-    } // End setData() method
-
-    public double getTime() {
-        return this.timeToComputeSum;
-    } // End getTime() method
+    public double getTimeToCompute() {
+        return this.timeToCompute;
+    } // End getTimeToCompute() method
 
     public String toString() {
         String output = "";
@@ -63,79 +83,35 @@ public class Matrix {
         return output;
     } // End toString() method
 
-    public int[][] transposeMatrix(int[][] originalMatrix) {
-        int[][] transposedMatrix = new int[originalMatrix.length][originalMatrix.length];
-
-        for (int row = 0; row < transposedMatrix.length; ++row) {
-            for (int col = 0; col < transposedMatrix.length; ++col) {
-                transposedMatrix[row][col] = originalMatrix[col][row];
-            } // End nested for loop
-        } // End for loop
-
-        return transposedMatrix;
-    } // End transposeMatrix(int[][]) method
-
-    public long sumOfMatrixElements(int[][] arr, int dimensions) { /* DO NOT SYNCHRONIZE */
-        long sum = 0;
-        
-        for (int row = 0; row < dimensions; ++row) {
-            for (int column = 0; column < dimensions; ++column) {
-                sum += (long) arr[row][column];
-            } // End nested for loop
-        } // End for loop
-
-        return sum;
-    } // End sumOfMatrixElements(int[][], int) method
-
-    public void getColumn(int[][] array, int columnIndex, int[] column) {
-        for (int i = 0; i < array.length; i++) {
-            column[i] = array[i][columnIndex];
-        } // End for loop
-    } // End getColumn() method
-
-    public int[][] multiplyMatrices(Matrix one, Matrix two, int desiredDimensions, ThreadPool pool) {
-        long startTime;
-        long endTime;
-        
-        int[][] arr_one = one.getData();
-        int[][] arr_two = two.getData();
-
-        arr_two = transposeMatrix(arr_two);
-
-        int[][] productArr = new int[desiredDimensions][desiredDimensions];
-        
-        // int[] rowArr = new int[desiredDimensions];
-        // int[] columnArr = new int[desiredDimensions];
-
-        startTime = System.nanoTime();
-        for (int row = 0; row < desiredDimensions; ++row) {
-            // rowArr = arr_one[row];
-            for (int column = 0; column < desiredDimensions; ++column) {
-                // getColumn(arr_two, column, columnArr);
-
-                Job newJob = new Job(arr_one, arr_two, productArr, row, column);
-                pool.addJob(newJob);
-                // pool.dotProduct(rowArr, columnArr);
-                // productArr[row][column] = pool.getProduct();
-            } // End for loop
-        } // End for loop
-
-        while (!pool.isJobQueueEmpty()) { 
-            Thread.onSpinWait(); /* spin and wait for jobs to be done */ 
+    public void transpose() {
+        for (int row = 0; row < this.data.length; ++row) {
+            for (int col = row + 1; col < this.data[0].length; ++col) {
+                int temp = this.data[row][col];
+                this.data[row][col] = this.data[col][row];
+                this.data[col][row] = temp;
+            }
+        }
+    } // End transpose() method
+    
+    public long sum() {
+        if (this.sum != 0) {
+            return this.sum;
         }
 
-        endTime = System.nanoTime();
+        int n = this.data.length;
+        long sum = 0;
 
-        double totalTime = (endTime - startTime) / 1e9;
+        // long startTime = System.nanoTime();
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                sum += this.data[i][j];
+            }
+        }
+        // long endTime = System.nanoTime();
 
-        System.out.println("Calculation of matrix " + this.getName() + " (Product of " + one.getName() + " and " + two.getName() + ") complete - sum of the elements in " + this.getName() + " is: " + sumOfMatrixElements(productArr, desiredDimensions));
-        String timeToCompute = String.format("Time to compute matrix " + this.getName() + ": %.3f s", totalTime);
-        System.out.println(timeToCompute);
-        System.out.println();
-
-        this.timeToComputeSum = totalTime;
-
-        return productArr;
-    } // End multiplyMatrices() method
+        // this.timeToComputeSum = (endTime - startTime) / 1e9;
+        this.sum = sum;
+        return sum;
+    } // End sum() method
 
 } // End Matrix class
