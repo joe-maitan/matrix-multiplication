@@ -2,66 +2,79 @@ package csx55.threads;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class ThreadPool {
+public class ThreadPool implements Runnable {
 
-    private Thread[] threads; /* used to hold our threads */
-    private static volatile ConcurrentLinkedQueue<Job> jobQueue = new ConcurrentLinkedQueue<>();
+    private static ThreadPool pool = null;
 
-    public ThreadPool(int size) {
+    private Thread[] threads;
+    private ConcurrentLinkedQueue<Job> jobQueue;
+    private int threadCount;
+
+    private ThreadPool() {
+        int size = Runtime.getRuntime().availableProcessors();
         threads = new Thread[size];
+        jobQueue = new ConcurrentLinkedQueue<>();
+        threadCount = size;
 
-        for (int i = 0; i < threads.length; ++i) {
-            threads[i] = new Thread(this::workerThread, "" + i);
+        for (int i = 0; i < size; ++i) {
+            threads[i] = new Thread(this, ""+i);
             threads[i].setDaemon(true);
             threads[i].start();
-        } // End for loop
-    } // End ThreadPool(int) constructor
- 
+        }
+    } // End ThreadPool() constructor
+
+    public static synchronized ThreadPool getInstance() {
+        if (pool == null) {
+            pool = new ThreadPool();
+        }
+
+        return pool;
+    } // End getInstance() method
+
+    public int getThreadCount() {
+        return getInstance().threadCount;
+    } // End getThreadCount() method
+
     public void addJob(Job newJob) {
         jobQueue.add(newJob);
-    } // End addJob(j) method
+    } // End addJob() method
 
     public boolean isJobQueueEmpty() {
         return jobQueue.isEmpty();
-    } // End isJobQueueEmpty() method
-    
-    private void workerThread() { /* the code the thread will run */
+    }
+
+    @Override
+    public void run() {
         while (true) {
-            Job j;
+            Job newJob = jobQueue.poll();
 
-            // try {
-            //     // System.out.println(Thread.currentThread().getName());
-            //     j = jobQueue.take();
-            // } catch (InterruptedException err) {
-            //     break;
-            // }
-            
-            j = jobQueue.poll();
+            if (newJob != null) {
+                // System.out.println("Thread " + Thread.currentThread().getName() + " pulled a job off the queue!");
+                
+                // Actually process the job
+                int[][] m1 = newJob.getMatrixOne();
+                int[][] m2 = newJob.getMatrixTwo();
+                int[][] productMatrix = newJob.getProductMatrix();
 
-            if (j != null) {
+                int row = newJob.getRowIndex();
+                int col = newJob.getColIndex();
+
+                int[] m1Row = m1[row];
+                int[] m2Row = m2[col];
+                
+                // Perform matrix multiplication for assigned rows
                 int product = 0;
-                int[][] m1 = j.getMatrixOne();
-                int[][] m2 = j.getMatrixTwo();
-                int[][] productMatrix = j.getProductMatrix();
-    
-                int[] m1Row = m1[j.getRow()];
-                int[] m2Col = m2[j.getCol()];
-    
-                for (int pos = 0; pos < m1.length; ++pos) {
-                    // This works with a second matrix that is not transposed
-                    // product += m1[j.getRow()][pos] * m2[pos][j.getCol()];
-    
-                    // Case where m2 is transposed
-                    product += m1Row[pos] * m2Col[pos];
-                } // End outside for loop
-    
-                productMatrix[j.getRow()][j.getCol()] = product; 
+                for (int i = 0; i < m1.length; ++i) {
+                    product += m1Row[i] * m2Row[i];
+                }
+
+                productMatrix[row][col] = product;
+                
+                // System.out.printf("Thread %s completed rows: %d to %d", Thread.currentThread().getName(), startRow, endRow-1);
             } else {
                 Thread.onSpinWait();
-            } // End if-else statement
-
+            }
         } // End while loop
-
-    } // End workerThread() method
+    } // End run() method
 
 } // End ThreadPool class
