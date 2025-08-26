@@ -19,6 +19,8 @@ The main file for this program is ```MatrixThreads.java```
 
 The main method of this program takes in two arugments: desired size of the matrix and our seed.
 
+The thread pool size will default to how many threads are available.
+
 This seed was mainly used to ensure we were getting the correct sum for each matrix.
 
 You can use the ```run.sh``` script to run the program.
@@ -29,16 +31,21 @@ chmod +x run.sh
 
 To ensure correctness, running ```./run.sh 3000 31459``` should give you an output of:
 ```
+Dimensionality of the square matrices is: 3000
+The thread pool size has been initialized to: 16
+
 Sum of the elements in input matrix A = 3409964
 Sum of the elements in input matrix B = 3799344
 Sum of the elements in input matrix C = 4095260
 Sum of the elements in input matrix D = 626540
 
-Calculation of matrix X (product of A and B) complete – sum of the elements in X is: -37432324759
-Time to compute matrix X: 3.440 s
-Calculation of matrix Y (product of C and D) complete – sum of the elements in Y is: -79329110607
-Time to compute matrix Y: 3.735 s
-Calculation of matrix Z (product of X and Y) complete – sum of the elements in Z is: -3449983994057
+Calcuation of matrix X (product of A and B) complete - sum of elements in X is: -37432324759
+Time to compute matrix X: 2.330 seconds.
+Calcuation of matrix Y (product of C and D) complete - sum of elements in Y is: -79329110607
+Time to compute matrix Y: 2.018 seconds.
+Calcuation of matrix Z (product of X and Y) complete - sum of elements in Z is: -3448218392825
+Time to compute matrix Z: 2.140 seconds.
+Cumulative time to compute matrices X, Y, and Z using a thread pool of size = 16 is : 6.487 s
 ```
 
 Make sure the sums match!
