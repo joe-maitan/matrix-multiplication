@@ -4,65 +4,56 @@ import java.util.Random;
 
 public class MatrixThreads {
 
+    public static boolean validMatrixSize(int size) {
+        return size > 0 && size <= 9000;
+    } // End validMatrixSize() method
+
+    public static boolean validSeed(int seed) {
+        return seed > 0;
+    } // End validSeed() method
+
     public static void main(String[] args) {
-        if (args.length < 3) {
-            System.err.println("Invalid # of arguments");
+        if (args.length < 2) {
+            System.err.println("Error - Invalid # of arguments.");
             System.exit(1);
         } // End if statement
 
-        final int THREAD_POOL_SIZE = Integer.parseInt(args[0]); // Runtime.getRuntime().availableProcessors();
-        final int MATRIX_DIMENSIONS = Integer.parseInt(args[1]);
-        final int SEED = Integer.parseInt(args[2]);
+        final int MATRIX_DIMENSIONS = Integer.parseInt(args[0]);
+        final int SEED = Integer.parseInt(args[1]);
 
-        if (THREAD_POOL_SIZE <= 0 || MATRIX_DIMENSIONS <= 1 || SEED < 0) {
-            System.err.println("Invalid entry for arguments");
+        if (validMatrixSize(MATRIX_DIMENSIONS) == false) {
+            System.err.println("Error: Invalid dimensions for matrix.");
             System.exit(1);
-        } // End if statement
+        }
 
-        System.out.println("Dimensionality of the square matrices is: " + MATRIX_DIMENSIONS);
-        System.out.println("The thread pool size has been initialized to: " + THREAD_POOL_SIZE);
-        ThreadPool pool = new ThreadPool(THREAD_POOL_SIZE);
+        if (validSeed(SEED) == false) {
+            System.err.println("Error: Invalid seed.");
+            System.exit(1);
+        }
+
+        ThreadPool pool = ThreadPool.getInstance();
+
+        System.out.printf("Dimensionality of the square matrices is: %d\n", MATRIX_DIMENSIONS);
+        System.out.printf("The thread pool size has been initialized to: %d\n\n", pool.getThreadCount());
+
+        Random rng = new Random(SEED);
+        Matrix a = new Matrix("A", MATRIX_DIMENSIONS, rng);
+        Matrix b = new Matrix("B", MATRIX_DIMENSIONS, rng);
+        Matrix c = new Matrix("C", MATRIX_DIMENSIONS, rng);
+        Matrix d = new Matrix("D", MATRIX_DIMENSIONS, rng);
+
         System.out.println();
 
-        /* These are our four matrices used to calculate X and Y 
-        *   X = A * B 
-        *   and 
-        *   Y = C * D
-        */
-        Random numberGenerator = new Random(SEED);
-        Matrix a = new Matrix('A', MATRIX_DIMENSIONS, numberGenerator);
-        Matrix b = new Matrix('B', MATRIX_DIMENSIONS, numberGenerator);
-        Matrix c = new Matrix('C', MATRIX_DIMENSIONS, numberGenerator);
-        Matrix d = new Matrix('D', MATRIX_DIMENSIONS, numberGenerator);
+        Matrix x = new Matrix("X", MATRIX_DIMENSIONS);
+        Matrix y = new Matrix("Y", MATRIX_DIMENSIONS);
+        Matrix z = new Matrix("Z", MATRIX_DIMENSIONS);
 
-        System.out.println();
+        x.multiplyMatrices(a, b, pool);
+        y.multiplyMatrices(c, d, pool);
+        z.multiplyMatrices(x, y, pool);
 
-        Matrix x = new Matrix('X', MATRIX_DIMENSIONS);
-        Matrix y = new Matrix('Y', MATRIX_DIMENSIONS);
-        Matrix z = new Matrix('Z', MATRIX_DIMENSIONS);
-
-        // System.out.println("Calculating Matrix X");
-        // System.out.println(a.toString());
-        // System.out.println(b.toString());
-        x.data = x.multiplyMatrices(a, b, MATRIX_DIMENSIONS, pool);
-        // System.out.println(x.toString());
-
-        // System.out.println("Calculating Matrix Y");
-        // System.out.println(c.toString());
-        // System.out.println(d.toString());
-        y.data = y.multiplyMatrices(c, d, MATRIX_DIMENSIONS, pool);
-        // System.out.println(y.toString());
-
-        // System.out.println("Calculating Matrix Z");
-        // System.out.println(x.toString());
-        // System.out.println(y.toString());
-        z.data = z.multiplyMatrices(x, y, MATRIX_DIMENSIONS, pool);
-        // System.out.println(z.toString());
-        
-        double cumulativeTime = x.getTime() + y.getTime() + z.getTime();
-       
-        String output = String.format("Cumulative time to compute matrices X, Y, and Z using a thread pool of size = %d is : %.3f s", THREAD_POOL_SIZE, cumulativeTime);
-        System.out.println(output);
+        double cumulativeTime = x.getTimeToCompute() + y.getTimeToCompute() + z.getTimeToCompute();
+        System.out.printf("Cumulative time to compute matrices X, Y, and Z using a thread pool of size = %d is : %.3f s\n", pool.getThreadCount(), cumulativeTime);
     } // End main method
     
 } // End MatrixThreads class
