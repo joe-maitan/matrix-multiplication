@@ -1,9 +1,9 @@
 # matrix-multiplication
 The objective of this project was to get comfortable with using threads and synchronization mechanisms. 
 
-This project was the most fun I have had in a coding project in a while because I love seeing software and hardware interact. This project has also become one of my favorite benchmarking tools.
+This project was the most fun I have had in a coding project because I love seeing software and hardware interact. This project has also become one of my favorite benchmarking tools.
 
-My computer (Ryzen 7 9800X3D and 32GB DDR5 @6000Mhz) averages around 6.5 seconds. My girlfriends M4 MacBook Pro averages around 10 seconds. See if you can beat our times!
+My computer (9800X3D (8C/16T) and 32GB DDR5 @6000Mhz) averages around 6.5 seconds. My girlfriends M4 MacBook Pro (10C/10T wih 16GB of RAM) averages around 10 seconds. See if you can beat our times!
 
 What I learned about:
 - Synchronization mechanisms and when to use them.
@@ -41,10 +41,14 @@ The main file for this program is `MatrixThreads.java`
 
 You can use the `run.sh` script to run the program.
 ```
-chmod +x run.sh
 ./run.sh <size-of-matrix> <seed>
 ```
 - The seed arugment was used to ensure we calcuated the correct sum for each matrix.
+
+```
+chmod +x run.sh
+./run.sh 3000 31459
+```
 
 For example, running ```./run.sh 3000 31459``` should give you an output of:
 ```
