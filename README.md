@@ -1,8 +1,9 @@
 # matrix-multiplication
-
 The objective of this project was to get comfortable with using threads and synchronization mechanisms. 
 
-This project was the most fun I have had in a coding project in a while because it was teaching me concepts that I felt could apply to something I wanna do in the future.
+This project was the most fun I have had in a coding project in a while because I love seeing software and hardware interact. This project has also become one of my favorite benchmarking tools.
+
+My computer (Ryzen 7 9800X3D and 32GB DDR5 @6000Mhz) averages around 6.5 seconds. My girlfriends M4 MacBook Pro averages around 10 seconds. See if you can beat our times!
 
 What I learned about:
 - Synchronization mechanisms and when to use them.
@@ -11,25 +12,41 @@ What I learned about:
 - How to debug and prevent concurrency issues.
 
 # How to run the program.
-This program was built using **gradle version 8.3**.
+## Docker
+1. Build the Containerfile:
+  ```
+  docker build -f Containerfile -t matrix-multiplication:latest
+  ```
 
-You must have **Java version 8** or higher to build and run the program.
+2. Run the image
+  ```
+  docker run matrix-multiplication
+  ```
 
-The main file for this program is ```MatrixThreads.java```
+## Podman
+1. Build the Containerfile:
+  ```
+  podman build --manifest matirx-multiplication .
+  ```
 
-The main method of this program takes in two arugments: desired size of the matrix and our seed.
+2. Run the image
+  ```
+  podman start matrix-multiplication
+  ```
 
-The thread pool size will default to how many threads are available.
+## On your bare metal
+You must have **Java version 8** and **gradle version 8.3** or higher.
 
-This seed was mainly used to ensure we were getting the correct sum for each matrix.
+The main file for this program is `MatrixThreads.java`
 
-You can use the ```run.sh``` script to run the program.
+You can use the `run.sh` script to run the program.
 ```
 chmod +x run.sh
 ./run.sh <size-of-matrix> <seed>
 ```
+- The seed arugment was used to ensure we calcuated the correct sum for each matrix.
 
-To ensure correctness, running ```./run.sh 3000 31459``` should give you an output of:
+For example, running ```./run.sh 3000 31459``` should give you an output of:
 ```
 Dimensionality of the square matrices is: 3000
 The thread pool size has been initialized to: 16
@@ -47,5 +64,3 @@ Calcuation of matrix Z (product of X and Y) complete - sum of elements in Z is: 
 Time to compute matrix Z: 2.077 seconds.
 Cumulative time to compute matrices X, Y, and Z using a thread pool of size = 16 is : 6.671 s
 ```
-
-Make sure the sums match!
