@@ -65,6 +65,7 @@ public class Matrix {
         return this.timeToCompute;
     } // End getTimeToCompute() method
 
+    @Override
     public String toString() {
         String output = "";
 
