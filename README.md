@@ -11,30 +11,7 @@ What I learned about:
 - The role data structures and locking mechanisms play when designing concurrent programs.
 - How to debug and prevent concurrency issues.
 
-# How to run the program.
-## Docker
-1. Build the Containerfile:
-  ```
-  docker build -f Containerfile -t matrix-multiplication:latest
-  ```
-
-2. Run the image
-  ```
-  docker run matrix-multiplication
-  ```
-
-## Podman
-1. Build the Containerfile:
-  ```
-  podman build --manifest matirx-multiplication .
-  ```
-
-2. Run the image
-  ```
-  podman start matrix-multiplication
-  ```
-
-## On your bare metal
+## Running the program
 You must have **Java version 8** and **gradle version 8.3** or higher.
 
 The main file for this program is `MatrixThreads.java`
