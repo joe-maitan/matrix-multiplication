@@ -1,33 +1,38 @@
 # matrix-multiplication
-The objective of this project was to get comfortable with using threads and synchronization mechanisms. 
+The objectives of this project:
+- To get comfortable with using threads and synchronization mechanisms.
+- Understand the role that data structures and locking mechanisms play in designing concurrent programs. 
 
-This project was the most fun I have had in a coding project because I love seeing software and hardware interact. This project has also become one of my favorite benchmarking tools.
+This was the most fun I have had in a coding project because I love seeing software and hardware interact.
 
-My computer (9800X3D (8C/16T) and 32GB DDR5 @6000Mhz) averages around 6.5 seconds. My girlfriends M4 MacBook Pro (10C/10T wih 16GB of RAM) averages around 10 seconds. See if you can beat our times!
+My computer averages around 6.5 seconds.
 
 What I learned about:
 - Synchronization mechanisms and when to use them.
-- Differences between the utilization of a thread pool and just creating multiple random object threads.
-- The role data structures and locking mechanisms play when designing concurrent programs.
+- Differences between the utilization of a thread pool and creating multiple random object threads.
+- The importance of knowing which data structure(s) to use and why.
 - How to debug and prevent concurrency issues.
 
 ## Running the program
 You must have **Java version 8** and **gradle version 8.3** or higher.
 
-The main file for this program is `MatrixThreads.java`
-
-You can use the `run.sh` script to run the program.
+You can use the `run.sh` script to run the program. It takes two arguments `size-of-matrix` and `seed`.
+- `size-of-matrix`: is going to be the MxM dimensions of the matrices created.
+- `seed`: the seed to feed the random number generator which is used to initialize elements in the matrices.
 ```
 ./run.sh <size-of-matrix> <seed>
 ```
-- The seed arugment was used to ensure we calcuated the correct sum for each matrix.
-
 ```
 chmod +x run.sh
 ./run.sh 3000 31459
 ```
+### Usage
+For example, running:
+```
+./run.sh 3000 31459
+``` 
 
-For example, running ```./run.sh 3000 31459``` should give you an output of:
+should give you an output of:
 ```
 Dimensionality of the square matrices is: 3000
 The thread pool size has been initialized to: 16
